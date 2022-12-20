@@ -17,19 +17,16 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var db *sql.DB
-
 func main() {
 	db, err := InitDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	h := expense.NewExpenseHandler(db)
-
-	e.POST("/expenses", h.CreateExpenseHandler)
-
 	e := echo.New()
+
+	h := expense.NewExpenseHandler(db)
+	e.POST("/expenses", h.CreateExpenseHandler)
 
 	e.Logger.SetLevel(log.INFO)
 
