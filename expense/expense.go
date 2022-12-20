@@ -23,10 +23,6 @@ type Logger struct {
 	Handler http.Handler
 }
 
-type Response struct {
-	err error
-}
-
 type handler struct {
 	DB *sql.DB
 }

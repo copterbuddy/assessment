@@ -15,7 +15,7 @@ import (
 
 func TestGetGreeting(t *testing.T) {
 	//Arrange
-	c, res := request(http.MethodGet, uri(""), strings.NewReader(""))
+	c, res := Request(http.MethodGet, Uri(""), strings.NewReader(""))
 	h := handler{}
 
 	//Act
@@ -30,7 +30,14 @@ func TestGetGreeting(t *testing.T) {
 
 func Test_Create_When_No_Request_Body(t *testing.T) {
 	//Arrange
-	c, res := request(http.MethodGet, uri("expenses"), strings.NewReader(""))
+	expense := Expense{
+		ID:     0,
+		Title:  "",
+		Amount: 0,
+		Note:   "",
+		Tags:   nil,
+	}
+	c, res := Request(http.MethodGet, Uri("expenses"), ReqString((expense)))
 	expected := Err{
 		Message: "data incurrect",
 	}
@@ -52,7 +59,7 @@ func Test_Create_When_No_Request_Body(t *testing.T) {
 	}
 }
 
-func request(method, url string, body io.Reader) (echo.Context, *httptest.ResponseRecorder) {
+func Request(method, url string, body io.Reader) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -62,7 +69,7 @@ func request(method, url string, body io.Reader) (echo.Context, *httptest.Respon
 	return c, rec
 }
 
-func uri(paths ...string) string {
+func Uri(paths ...string) string {
 	host := "http://localhost:2565"
 	if paths == nil {
 		return host
@@ -70,4 +77,12 @@ func uri(paths ...string) string {
 
 	url := append([]string{host}, paths...)
 	return strings.Join(url, "/")
+}
+
+func ReqString(reqStruct interface{}) *strings.Reader {
+	if reqStruct != nil {
+		return strings.NewReader("")
+	}
+	result, _ := json.Marshal(&reqStruct)
+	return strings.NewReader(string(result))
 }
