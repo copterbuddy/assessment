@@ -1,6 +1,7 @@
 package expense
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,19 +14,29 @@ import (
 
 func TestGetGreeting(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
+	// req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
+	// req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	// rec := httptest.NewRecorder()
+	// c := e.NewContext(req, rec)
+
+	c, rec := request(http.MethodGet, "/", strings.NewReader(""), e)
 
 	h := handler{}
-	c := e.NewContext(req, rec)
-
 	err := h.Greeting(c)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, "Hello, World!", rec.Body.String())
 	}
+}
+
+func request(method, url string, body io.Reader, e *echo.Echo) (echo.Context, *httptest.ResponseRecorder) {
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	c := e.NewContext(req, rec)
+	return c, rec
 }
 
 func Test_Create_When_No_Request_Body(t *testing.T) {

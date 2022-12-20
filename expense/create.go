@@ -15,7 +15,7 @@ func (h *handler) CreateExpenseHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
 	}
 
-	if e.Title == "" {
+	if e.Title == "" || e.Amount == 0 || e.Note == "" || e.Tags == nil {
 		return c.JSON(http.StatusBadRequest, Err{Message: "data incurrect"})
 	}
 
