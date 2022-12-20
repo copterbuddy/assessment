@@ -1,7 +1,6 @@
 package expense
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -9,13 +8,14 @@ import (
 	"testing"
 
 	_ "github.com/DATA-DOG/go-sqlmock"
+	"github.com/copterbuddy/assessment/converter"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetGreeting(t *testing.T) {
 	//Arrange
-	c, res := Request(http.MethodGet, Uri(""), ReqString(""))
+	c, res := Request(http.MethodGet, Uri(""), converter.ReqString(""))
 	h := handler{}
 
 	//Act
@@ -37,7 +37,7 @@ func Test_Create_When_No_Request_Body(t *testing.T) {
 		Note:   "",
 		Tags:   nil,
 	}
-	c, res := Request(http.MethodGet, Uri("expenses"), ReqString((expense)))
+	c, res := Request(http.MethodGet, Uri("expenses"), converter.ReqString((expense)))
 	expected := Err{
 		Message: "data incurrect",
 	}
@@ -50,7 +50,7 @@ func Test_Create_When_No_Request_Body(t *testing.T) {
 	}
 
 	ResponseBody := Err{}
-	ResStruct(res, &ResponseBody)
+	converter.ResStruct(res, &ResponseBody)
 
 	//Assert
 	if assert.NoError(t, err) {
@@ -77,16 +77,4 @@ func Uri(paths ...string) string {
 
 	url := append([]string{host}, paths...)
 	return strings.Join(url, "/")
-}
-
-func ReqString(reqStruct interface{}) *strings.Reader {
-	if reqStruct != nil {
-		return strings.NewReader("")
-	}
-	result, _ := json.Marshal(&reqStruct)
-	return strings.NewReader(string(result))
-}
-
-func ResStruct(res *httptest.ResponseRecorder, result interface{}) {
-	json.Unmarshal([]byte(res.Body.Bytes()), &result)
 }
