@@ -15,7 +15,7 @@ import (
 
 func TestGetGreeting(t *testing.T) {
 	//Arrange
-	c, res := Request(http.MethodGet, Uri(""), strings.NewReader(""))
+	c, res := Request(http.MethodGet, Uri(""), ReqString(""))
 	h := handler{}
 
 	//Act
