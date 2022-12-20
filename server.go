@@ -1,11 +1,10 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
+import "github.com/labstack/echo/v4"
 
 func main() {
-	fmt.Println("Please use server.go for main file")
-	fmt.Println("start at port:", os.Getenv("PORT"))
+
+	e := echo.New()
+
+	e.Logger.Fatal(e.Start(":2565"))
 }
