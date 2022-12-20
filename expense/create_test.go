@@ -1,6 +1,7 @@
 package expense
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -13,11 +14,14 @@ import (
 )
 
 func TestGetGreeting(t *testing.T) {
+	//Arrange
 	c, res := request(http.MethodGet, uri(""), strings.NewReader(""))
-
 	h := handler{}
+
+	//Act
 	err := h.Greeting(c)
 
+	//Assert
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, res.Code)
 		assert.Equal(t, "Hello, World!", res.Body.String())
@@ -25,15 +29,26 @@ func TestGetGreeting(t *testing.T) {
 }
 
 func Test_Create_When_No_Request_Body(t *testing.T) {
+	//Arrange
 	c, res := request(http.MethodGet, uri("expenses"), strings.NewReader(""))
-
+	expected := Err{
+		Message: "data incurrect",
+	}
 	h := handler{nil}
-	err := h.CreateExpenseHandler(c)
-	expected := "{\"message\":\"data incurrect\"}"
 
+	//Act
+	err := h.CreateExpenseHandler(c)
+
+	ResponseBody := Err{}
+	if res.Body == nil {
+		panic(err)
+	}
+	json.Unmarshal([]byte(res.Body.Bytes()), &ResponseBody)
+
+	//Assert
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusBadRequest, res.Code)
-		assert.Equal(t, expected, strings.TrimSpace(res.Body.String()))
+		assert.Equal(t, expected, ResponseBody)
 	}
 }
 
