@@ -26,6 +26,11 @@ func main() {
 	e := echo.New()
 
 	h := expense.NewExpenseHandler(db)
+
+	e.GET("/", func(c echo.Context) error {
+		time.Sleep(8 * time.Second)
+		return c.JSON(http.StatusOK, "OK")
+	})
 	e.POST("/expenses", h.CreateExpenseHandler)
 
 	e.Logger.SetLevel(log.INFO)
@@ -40,11 +45,6 @@ func main() {
 			e.Logger.Fatal("shutting down the server: ", err)
 		}
 	}()
-
-	e.GET("/", func(c echo.Context) error {
-		time.Sleep(8 * time.Second)
-		return c.JSON(http.StatusOK, "OK")
-	})
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)

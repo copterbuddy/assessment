@@ -24,7 +24,6 @@ type Logger struct {
 }
 
 type Response struct {
-	*http.Response
 	err error
 }
 

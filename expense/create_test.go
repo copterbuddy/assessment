@@ -13,7 +13,7 @@ import (
 )
 
 func TestGetGreeting(t *testing.T) {
-	c, res := request(http.MethodGet, "/", strings.NewReader(""))
+	c, res := request(http.MethodGet, uri(""), strings.NewReader(""))
 
 	h := handler{}
 	err := h.Greeting(c)
@@ -25,7 +25,7 @@ func TestGetGreeting(t *testing.T) {
 }
 
 func Test_Create_When_No_Request_Body(t *testing.T) {
-	c, res := request(http.MethodGet, "/", strings.NewReader(""))
+	c, res := request(http.MethodGet, uri("expenses"), strings.NewReader(""))
 
 	h := handler{nil}
 	err := h.CreateExpenseHandler(c)
@@ -45,4 +45,14 @@ func request(method, url string, body io.Reader) (echo.Context, *httptest.Respon
 
 	c := e.NewContext(req, rec)
 	return c, rec
+}
+
+func uri(paths ...string) string {
+	host := "http://localhost:2565"
+	if paths == nil {
+		return host
+	}
+
+	url := append([]string{host}, paths...)
+	return strings.Join(url, "/")
 }
