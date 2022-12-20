@@ -45,12 +45,12 @@ func Test_Create_When_No_Request_Body(t *testing.T) {
 
 	//Act
 	err := h.CreateExpenseHandler(c)
-
-	ResponseBody := Err{}
-	if res.Body == nil {
+	if err != nil {
 		panic(err)
 	}
-	json.Unmarshal([]byte(res.Body.Bytes()), &ResponseBody)
+
+	ResponseBody := Err{}
+	ResStruct(res, &ResponseBody)
 
 	//Assert
 	if assert.NoError(t, err) {
@@ -85,4 +85,8 @@ func ReqString(reqStruct interface{}) *strings.Reader {
 	}
 	result, _ := json.Marshal(&reqStruct)
 	return strings.NewReader(string(result))
+}
+
+func ResStruct(res *httptest.ResponseRecorder, result interface{}) {
+	json.Unmarshal([]byte(res.Body.Bytes()), &result)
 }
