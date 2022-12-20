@@ -10,14 +10,24 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/copterbuddy/assessment/expense"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	_ "github.com/lib/pq"
 )
 
+var db *sql.DB
+
 func main() {
-	InitDB()
+	db, err := InitDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	h := expense.NewExpenseHandler(db)
+
+	e.POST("/expenses", h.CreateExpenseHandler)
 
 	e := echo.New()
 
@@ -53,7 +63,7 @@ func main() {
 
 var db *sql.DB
 
-func InitDB() {
+func InitDB() (*sql.DB, error) {
 	url := os.Getenv("DATABASE_URL")
 	var err error
 	db, err = sql.Open("postgres", url)
@@ -74,4 +84,6 @@ func InitDB() {
 	if err != nil {
 		log.Fatal("can't create database", err)
 	}
+
+	return db, nil
 }
