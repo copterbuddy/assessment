@@ -20,12 +20,13 @@ func TestGetGreeting(t *testing.T) {
 
 	//Act
 	err := h.Greeting(c)
+	if err != nil {
+		t.Errorf("Test failed: %v", err)
+	}
 
 	//Assert
-	if assert.NoError(t, err) {
-		assert.Equal(t, http.StatusOK, res.Code)
-		assert.Equal(t, "Hello, World!", res.Body.String())
-	}
+	assert.Equal(t, http.StatusOK, res.Code)
+	assert.Equal(t, "Hello, World!", res.Body.String())
 }
 
 func Test_Create_When_No_Request_Body(t *testing.T) {
@@ -46,17 +47,15 @@ func Test_Create_When_No_Request_Body(t *testing.T) {
 	//Act
 	err := h.CreateExpenseHandler(c)
 	if err != nil {
-		panic(err)
+		t.Errorf("Test failed: %v", err)
 	}
 
 	ResponseBody := Err{}
 	converter.ResStruct(res, &ResponseBody)
 
 	//Assert
-	if assert.NoError(t, err) {
-		assert.Equal(t, http.StatusBadRequest, res.Code)
-		assert.Equal(t, expected, ResponseBody)
-	}
+	assert.Equal(t, http.StatusBadRequest, res.Code)
+	assert.Equal(t, expected, ResponseBody)
 }
 
 func Request(method, url string, body io.Reader) (echo.Context, *httptest.ResponseRecorder) {
