@@ -12,7 +12,8 @@ func (h *handler) CreateExpenseHandler(c echo.Context) error {
 	var e Expense
 	err := c.Bind(&e)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
+		c.Logger().Info(err)
+		return c.JSON(http.StatusBadRequest, Err{Message: "bad request"})
 	}
 
 	if e.Title == "" || e.Amount == 0 || e.Note == "" || e.Tags == nil {
