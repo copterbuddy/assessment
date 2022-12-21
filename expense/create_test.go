@@ -30,32 +30,39 @@ func TestGetGreeting(t *testing.T) {
 }
 
 func Test_Create_When_No_Request_Body(t *testing.T) {
-	//Arrange
-	expense := Expense{
-		ID:     0,
-		Title:  "",
-		Amount: 0,
-		Note:   "",
-		Tags:   nil,
-	}
-	c, res := Request(http.MethodGet, Uri("expenses"), converter.ReqString((expense)))
-	expected := Err{
-		Message: "data incurrect",
-	}
-	h := handler{nil}
-
-	//Act
-	err := h.CreateExpenseHandler(c)
-	if err != nil {
-		t.Errorf("Test failed: %v", err)
+	testcase := []Expense{
+		{Title: "", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}},
+		{Title: "strawberry smoothie", Amount: 0, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}},
+		{Title: "strawberry smoothie", Amount: 79, Note: "", Tags: nil},
+		{Title: "", Amount: 0, Note: "", Tags: nil},
 	}
 
-	ResponseBody := Err{}
-	converter.ResStruct(res, &ResponseBody)
+	for _, c := range testcase {
+		t.Run("invalid parameter", func(t *testing.T) {
+			//Arrange
+			want := Err{
+				Message: "data incurrect",
+			}
 
-	//Assert
-	assert.Equal(t, http.StatusBadRequest, res.Code)
-	assert.Equal(t, expected, ResponseBody)
+			ctx, res := Request(http.MethodGet, Uri("expenses"), converter.ReqString((c)))
+			h := handler{nil}
+
+			//Act
+			err := h.CreateExpenseHandler(ctx)
+			if err != nil {
+				t.Errorf("Test failed: %v", err)
+			}
+
+			ResponseBody := Err{}
+			converter.ResStruct(res, &ResponseBody)
+
+			//Assert
+			assert.Equal(t, http.StatusBadRequest, res.Code)
+			assert.Equal(t, want, ResponseBody)
+
+		})
+	}
+
 }
 
 func Request(method, url string, body io.Reader) (echo.Context, *httptest.ResponseRecorder) {
