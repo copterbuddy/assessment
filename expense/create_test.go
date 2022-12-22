@@ -1,7 +1,6 @@
 package expense
 
 import (
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -29,22 +28,22 @@ func TestGetGreeting(t *testing.T) {
 	assert.Equal(t, "Hello, World!", res.Body.String())
 }
 
-func Test_Create_When_No_Request_Body(t *testing.T) {
-	testcase := []Expense{
-		{Title: "", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}},
-		{Title: "strawberry smoothie", Amount: 0, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}},
-		{Title: "strawberry smoothie", Amount: 79, Note: "", Tags: nil},
-		{Title: "", Amount: 0, Note: "", Tags: nil},
+func Test_Create_When_Request_Body_Bind_Error(t *testing.T) {
+	testcase := []string{
+		"{\"title\":10,\"amount\":79,\"note\":\"nightmarketpromotiondiscount10bath\",\"tags\":Tags:[]string{\"food\",\"beverage\"}}",
+		"{\"title\":\"strawberry smoothie\",\"amount\":\"79\",\"note\":\"nightmarketpromotiondiscount10bath\",\"tags\":Tags:[]string{\"food\",\"beverage\"}}",
+		"{\"title\":\"strawberry smoothie\",\"amount\":\"79\",\"note\":3,\"tags\":Tags:[]string{\"food\",\"beverage\"}}",
+		"{\"title\":\"strawberry smoothie\",\"amount\":79,\"note\":\"nightmarketpromotiondiscount10bath\",\"tags\":10}",
 	}
 
 	for _, c := range testcase {
-		t.Run("invalid parameter", func(t *testing.T) {
+		t.Run("bind body error", func(t *testing.T) {
 			//Arrange
 			want := Err{
-				Message: "data incurrect",
+				Message: "bad request",
 			}
 
-			ctx, res := Request(http.MethodGet, Uri("expenses"), converter.ReqString(c))
+			ctx, res := Request(http.MethodPost, Uri("expenses"), c)
 			h := handler{nil}
 
 			//Act
@@ -65,9 +64,45 @@ func Test_Create_When_No_Request_Body(t *testing.T) {
 
 }
 
-func Request(method, url string, body io.Reader) (echo.Context, *httptest.ResponseRecorder) {
+func Test_Create_When_No_Request_Body(t *testing.T) {
+	testcase := []Expense{
+		{Title: "", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}},
+		{Title: "strawberry smoothie", Amount: 0, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}},
+		{Title: "strawberry smoothie", Amount: 79, Note: "", Tags: nil},
+		{Title: "", Amount: 0, Note: "", Tags: nil},
+	}
+
+	for _, c := range testcase {
+		t.Run("invalid parameter", func(t *testing.T) {
+			//Arrange
+			want := Err{
+				Message: "data incurrect",
+			}
+
+			ctx, res := Request(http.MethodPost, Uri("expenses"), converter.ReqString(c))
+			h := handler{nil}
+
+			//Act
+			err := h.CreateExpenseHandler(ctx)
+			if err != nil {
+				t.Errorf("Test failed: %v", err)
+			}
+
+			ResponseBody := Err{}
+			converter.ResStruct(res, &ResponseBody)
+
+			//Assert
+			assert.Equal(t, http.StatusBadRequest, res.Code)
+			assert.Equal(t, want, ResponseBody)
+
+		})
+	}
+
+}
+
+func Request(method, url string, body string) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 
