@@ -44,7 +44,7 @@ func Test_Create_When_No_Request_Body(t *testing.T) {
 				Message: "data incurrect",
 			}
 
-			ctx, res := Request(http.MethodGet, Uri("expenses"), converter.ReqString((c)))
+			ctx, res := Request(http.MethodGet, Uri("expenses"), converter.ReqString(c))
 			h := handler{nil}
 
 			//Act
