@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/copterbuddy/assessment/expense"
 	"github.com/copterbuddy/assessment/greeting"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -28,6 +29,7 @@ func main() {
 	e.Logger.SetLevel(log.INFO)
 
 	greetingHandler := greeting.NewGreetingHandler()
+	expenseHandler := expense.NewExpenseHandler(db)
 
 	go func() {
 		if err := e.Start(":2565"); err != nil && err != http.ErrServerClosed {
@@ -35,6 +37,7 @@ func main() {
 		}
 	}()
 	e.GET("/", greetingHandler.Greeting)
+	e.POST("/expenses", expenseHandler.CreateExpenseHandler)
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
