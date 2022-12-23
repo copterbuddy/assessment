@@ -1,5 +1,5 @@
-//go:build unit
-// +build unit
+//go:build integration
+// +build integration
 
 package greeting
 
@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetGreeting(t *testing.T) {
+func Test_it_GetGreeting(t *testing.T) {
 	//Arrange
 	c, res := request.Request(http.MethodGet, request.Uri(""), converter.ReqString(""))
 	h := handler{}
