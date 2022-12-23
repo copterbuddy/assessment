@@ -27,15 +27,15 @@ func main() {
 
 	h := expense.NewExpenseHandler(db)
 
-	e.POST("/expenses", h.CreateExpenseHandler)
-
 	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	e.POST("/expenses", h.CreateExpenseHandler)
 
 	e.Logger.SetLevel(log.INFO)
 
 	e.Logger.Fatal(e.Start(":2565"))
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
 
 	// e.Logger.Fatal(e.Start(":2565"))
 	go func() {
@@ -60,8 +60,6 @@ func main() {
 	}
 	fmt.Println("bye bye")
 }
-
-var db *sql.DB
 
 func InitDB() (*sql.DB, error) {
 	url := os.Getenv("DATABASE_URL")
