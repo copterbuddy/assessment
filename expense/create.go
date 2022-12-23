@@ -28,8 +28,8 @@ func (h *handler) CreateExpenseHandler(c echo.Context) error {
 
 	err = row.Scan(&e.ID)
 	if err != nil {
-		c.Logger().Info(err)
-		return c.JSON(http.StatusInternalServerError, err)
+		c.Logger().Info(err.Error())
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, e)

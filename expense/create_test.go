@@ -6,9 +6,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/DATA-DOG/go-sqlmock"
 	"github.com/copterbuddy/assessment/converter"
 	"github.com/labstack/echo/v4"
+	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,6 +28,62 @@ func TestGetGreeting(t *testing.T) {
 	//Assert
 	assert.Equal(t, http.StatusOK, res.Code)
 	assert.Equal(t, "Hello, World!", res.Body.String())
+}
+
+func Test_Create_Success_Case(t *testing.T) {
+	//Arrange
+	// testcase := []Expense{
+	// 	{Title: "", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}},
+	// 	{Title: "strawberry smoothie", Amount: 0, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}},
+	// 	{Title: "strawberry smoothie", Amount: 79, Note: "", Tags: nil},
+	// 	{Title: "", Amount: 0, Note: "", Tags: nil},
+	// }
+	testcase := Expense{
+		ID:     0,
+		Title:  "strawberry smoothie",
+		Amount: 79,
+		Note:   "night market promotion discount 10 bath",
+		Tags:   []string{"food", "beverage"},
+	}
+
+	want := Expense{
+		ID:     1,
+		Title:  "strawberry smoothie",
+		Amount: 79,
+		Note:   "night market promotion discount 10 bath",
+		Tags:   []string{"food", "beverage"},
+	}
+
+	ctx, res := Request(http.MethodPost, Uri("expenses"), converter.ReqString(testcase))
+
+	// newsMockRows := sqlmock.NewRows([]string{"id", "title", "content", "author"}).
+	// 	AddRow("1", "test-title", "test-content", "test-author")
+	// var lastInsertID, affected int64
+	// newsMockRows := sqlmock.NewResult(lastInsertID, affected)
+
+	db, mock, err := sqlmock.New()
+	// mock.ExpectQuery("SELECT (.+) FROM news_articles").WillReturnRows(newsMockRows)
+	mock.ExpectQuery("INSERT INTO expenses (.+) RETURNING id").
+		WithArgs(testcase.Title, testcase.Amount, testcase.Note, `{"food","beverage"}`).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	h := handler{db}
+
+	//Act
+	err = h.CreateExpenseHandler(ctx)
+	if err != nil {
+		t.Errorf("Test failed: %v", err)
+	}
+
+	ResponseBody := Expense{}
+	converter.ResStruct(res, &ResponseBody)
+
+	//Assert
+	assert.Equal(t, http.StatusCreated, res.Code)
+	assert.Equal(t, want, ResponseBody)
 }
 
 func Test_Create_When_Request_Body_Bind_Error(t *testing.T) {
