@@ -32,12 +32,6 @@ func TestGetGreeting(t *testing.T) {
 
 func Test_Create_Success_Case(t *testing.T) {
 	//Arrange
-	// testcase := []Expense{
-	// 	{Title: "", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}},
-	// 	{Title: "strawberry smoothie", Amount: 0, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}},
-	// 	{Title: "strawberry smoothie", Amount: 79, Note: "", Tags: nil},
-	// 	{Title: "", Amount: 0, Note: "", Tags: nil},
-	// }
 	testcase := Expense{
 		ID:     0,
 		Title:  "strawberry smoothie",
@@ -54,17 +48,11 @@ func Test_Create_Success_Case(t *testing.T) {
 		Tags:   []string{"food", "beverage"},
 	}
 
+	teststring := `{"` + strings.Join(testcase.Tags, `","`) + `"}`
 	ctx, res := Request(http.MethodPost, Uri("expenses"), converter.ReqString(testcase))
-
-	// newsMockRows := sqlmock.NewRows([]string{"id", "title", "content", "author"}).
-	// 	AddRow("1", "test-title", "test-content", "test-author")
-	// var lastInsertID, affected int64
-	// newsMockRows := sqlmock.NewResult(lastInsertID, affected)
-
 	db, mock, err := sqlmock.New()
-	// mock.ExpectQuery("SELECT (.+) FROM news_articles").WillReturnRows(newsMockRows)
 	mock.ExpectQuery("INSERT INTO expenses (.+) RETURNING id").
-		WithArgs(testcase.Title, testcase.Amount, testcase.Note, `{"food","beverage"}`).
+		WithArgs(testcase.Title, testcase.Amount, testcase.Note, teststring).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
 	if err != nil {
