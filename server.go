@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/copterbuddy/assessment/greeting"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -21,23 +22,19 @@ func main() {
 
 	e := echo.New()
 
-	e.Logger.SetLevel(log.INFO)
-
-	e.Logger.Fatal(e.Start(":2565"))
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	// e.Logger.Fatal(e.Start(":2565"))
+	e.Logger.SetLevel(log.INFO)
+
+	greetingHandler := greeting.NewGreetingHandler()
+
 	go func() {
 		if err := e.Start(":2565"); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server: ", err)
 		}
 	}()
-
-	e.GET("/", func(c echo.Context) error {
-		time.Sleep(8 * time.Second)
-		return c.JSON(http.StatusOK, "OK")
-	})
+	e.GET("/", greetingHandler.Greeting)
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)

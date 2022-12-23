@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Get_Expense_Handler_With_DBB(t *testing.T) {
+func Test_Get_Expense_Handler_With_DB(t *testing.T) {
 	db, _, _ := sqlmock.New()
 	newHandler := NewExpenseHandler(db)
 	assert.NotNil(t, newHandler)
