@@ -48,11 +48,10 @@ func Test_Create_Success_Case(t *testing.T) {
 		Tags:   []string{"food", "beverage"},
 	}
 
-	teststring := `{"` + strings.Join(testcase.Tags, `","`) + `"}`
 	ctx, res := Request(http.MethodPost, Uri("expenses"), converter.ReqString(testcase))
 	db, mock, err := sqlmock.New()
 	mock.ExpectQuery("INSERT INTO expenses (.+) RETURNING id").
-		WithArgs(testcase.Title, testcase.Amount, testcase.Note, teststring).
+		WithArgs(testcase.Title, testcase.Amount, testcase.Note, `{"`+strings.Join(testcase.Tags, `","`)+`"}`).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
 	if err != nil {
