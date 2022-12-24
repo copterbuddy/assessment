@@ -5,6 +5,7 @@ package expense
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,6 +15,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/copterbuddy/assessment/converter"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,7 +26,12 @@ func Test_it_Create_Success_Case(t *testing.T) {
 
 	eh := echo.New()
 	go func(e *echo.Echo) {
-		h := NewExpenseHandler(nil)
+		db, err := sql.Open("postgres", "postgresql://root:root@db/go-example-db?sslmode=disable")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		h := NewExpenseHandler(db)
 
 		e.POST("/expenses", h.CreateExpenseHandler)
 		e.Start(fmt.Sprintf(":%d", serverPort))
@@ -41,48 +48,47 @@ func Test_it_Create_Success_Case(t *testing.T) {
 	}
 
 	//Arrange
-	// testcase := Expense{
-	// 	ID:     0,
-	// 	Title:  "strawberry smoothie",
-	// 	Amount: 79,
-	// 	Note:   "night market promotion discount 10 bath",
-	// 	Tags:   []string{"food", "beverage"},
-	// }
-	// c, res := request.Request(http.MethodPost, request.Uri("expenses"), converter.ReqString(testcase))
-	// h := handler{db}
-	reqBody := `
-	{
+	testcase := Expense{
 		ID:     0,
 		Title:  "strawberry smoothie",
 		Amount: 79,
 		Note:   "night market promotion discount 10 bath",
 		Tags:   []string{"food", "beverage"},
 	}
-	`
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:%d/expenses", serverPort), strings.NewReader(reqBody))
+
+	want := Expense{
+		ID:     1,
+		Title:  "strawberry smoothie",
+		Amount: 79,
+		Note:   "night market promotion discount 10 bath",
+		Tags:   []string{"food", "beverage"},
+	}
+
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:%d/expenses", serverPort), strings.NewReader(converter.ReqString(testcase)))
 	assert.NoError(t, err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	client := http.Client{}
 
 	//Act
-	// err := h.Greeting(c)
-	// if err != nil {
-	// 	t.Errorf("Test failed: %v", err)
-	// }
 	resp, err := client.Do(req)
 	assert.NoError(t, err)
 
 	byteBody, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(t, err)
 	resp.Body.Close()
+	fmt.Println("byteBody is :", string(byteBody))
+
+	var resStruct Expense
+	converter.ResStructFromByteArray(byteBody, &resStruct)
 
 	//Assert
-	// assert.Equal(t, http.StatusOK, res.Code)
-	// assert.Equal(t, "Hello, World!", res.Body.String())
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
-		// assert.Equal(t, "Hello, World!", string(byteBody))
-		log.Println(fmt.Sprintf(fmt.Sprintf("int result is : %v", string(byteBody))))
+		assert.NotEmpty(t, want.ID)
+		assert.Equal(t, want.Title, resStruct.Title)
+		assert.Equal(t, want.Amount, resStruct.Amount)
+		assert.Equal(t, want.Note, resStruct.Note)
+		assert.Equal(t, want.Tags, resStruct.Tags)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
