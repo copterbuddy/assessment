@@ -6,6 +6,7 @@ package expense
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -79,7 +80,7 @@ func Test_it_Create_Success_Case(t *testing.T) {
 	fmt.Println("byteBody is :", string(byteBody))
 
 	var resStruct Expense
-	converter.ResStructFromByteArray(byteBody, &resStruct)
+	json.Unmarshal(byteBody, &resStruct)
 
 	//Assert
 	if assert.NoError(t, err) {
