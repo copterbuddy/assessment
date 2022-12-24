@@ -3,8 +3,6 @@ package expense
 import (
 	"database/sql"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
 )
 
 type Expense struct {
@@ -29,8 +27,4 @@ type handler struct {
 
 func NewExpenseHandler(db *sql.DB) *handler {
 	return &handler{db}
-}
-
-func (h *handler) Greeting(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
 }

@@ -1,3 +1,6 @@
+//go:build unit
+// +build unit
+
 package expense
 
 import (
@@ -10,22 +13,6 @@ import (
 	"github.com/copterbuddy/assessment/request"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestGetGreeting(t *testing.T) {
-	//Arrange
-	c, res := request.Request(http.MethodGet, request.Uri(""), converter.ReqString(""))
-	h := handler{}
-
-	//Act
-	err := h.Greeting(c)
-	if err != nil {
-		t.Errorf("Test failed: %v", err)
-	}
-
-	//Assert
-	assert.Equal(t, http.StatusOK, res.Code)
-	assert.Equal(t, "Hello, World!", res.Body.String())
-}
 
 func Test_Create_Success_Case(t *testing.T) {
 	//Arrange
