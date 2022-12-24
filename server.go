@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/copterbuddy/assessment/expense"
+	"github.com/copterbuddy/assessment/greeting"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -18,33 +19,25 @@ import (
 )
 
 func main() {
-	db, err := InitDB()
-	if err != nil {
-		log.Fatal(err)
-	}
+	InitDB()
 
 	e := echo.New()
 
-	h := expense.NewExpenseHandler(db)
-
-	e.GET("/", func(c echo.Context) error {
-		time.Sleep(8 * time.Second)
-		return c.JSON(http.StatusOK, "OK")
-	})
-	e.POST("/expenses", h.CreateExpenseHandler)
-
-	e.Logger.SetLevel(log.INFO)
-
-	e.Logger.Fatal(e.Start(":2565"))
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	// e.Logger.Fatal(e.Start(":2565"))
+	e.Logger.SetLevel(log.INFO)
+
+	greetingHandler := greeting.NewGreetingHandler()
+	expenseHandler := expense.NewExpenseHandler(db)
+
 	go func() {
 		if err := e.Start(":2565"); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server: ", err)
 		}
 	}()
+	e.GET("/", greetingHandler.Greeting)
+	e.POST("/expenses", expenseHandler.CreateExpenseHandler)
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
@@ -60,7 +53,7 @@ func main() {
 
 var db *sql.DB
 
-func InitDB() (*sql.DB, error) {
+func InitDB() {
 	url := os.Getenv("DATABASE_URL")
 	var err error
 	db, err = sql.Open("postgres", url)
@@ -81,6 +74,4 @@ func InitDB() (*sql.DB, error) {
 	if err != nil {
 		log.Fatal("can't create database", err)
 	}
-
-	return db, nil
 }
