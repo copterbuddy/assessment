@@ -85,7 +85,7 @@ func Test_it_Create_Success_Case(t *testing.T) {
 	//Assert
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
-		assert.NotEmpty(t, want.ID)
+		assert.NotEqual(t, 0, resStruct.ID)
 		assert.Equal(t, want.Title, resStruct.Title)
 		assert.Equal(t, want.Amount, resStruct.Amount)
 		assert.Equal(t, want.Note, resStruct.Note)
