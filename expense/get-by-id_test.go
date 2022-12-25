@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"testing"
 
-	_ "github.com/DATA-DOG/go-sqlmock"
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/copterbuddy/assessment/converter"
 	"github.com/copterbuddy/assessment/request"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,9 +28,18 @@ func Test_Get_Expense_By_Id(t *testing.T) {
 	c.SetParamNames("id")
 	c.SetParamValues("1")
 
+	newsMockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
+		AddRow(want.ID, want.Title, want.Amount, want.Note, pq.Array(want.Tags))
+
+	db, mock, err := sqlmock.New()
+	mock.ExpectQuery("SELECT (.+) FROM expenses").WillReturnRows(newsMockRows)
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	h := handler{db}
+
 	//Act
-	h := handler{}
-	err := h.GetExpenseByIdHandler(c)
+	err = h.GetExpenseByIdHandler(c)
 
 	ResponseBody := Expense{}
 	converter.ResStruct(rec, &ResponseBody)
