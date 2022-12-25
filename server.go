@@ -32,6 +32,7 @@ func main() {
 	e.Use(middleware.Recover())
 
 	e.POST("/expenses", h.CreateExpenseHandler)
+	e.GET("/expenses/:id", h.GetExpenseByIdHandler)
 
 	e.Logger.SetLevel(log.INFO)
 
