@@ -10,3 +10,8 @@ CREATE TABLE IF NOT EXISTS expenses (
     "tags" TEXT[],
     PRIMARY KEY ("id")
 );
+
+-- id 1 use for service get-by-id_it_test
+INSERT INTO "expenses" ("title","amount","note","tags") VALUES ('strawberry smoothie', 79, 'night market promotion discount 10 bath', '{"food", "beverage"}');
+-- id 2 use for service update-by-id_it_test
+INSERT INTO "expenses" ("title","amount","note","tags") VALUES ('strawberry smoothie', 19, 'night market promotion discount 10 bath', '{"food", "beverage"}');
