@@ -20,9 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const serverPort = 2565
-
-func Test_it_Create_Success_Case(t *testing.T) {
+func Test_it_Get_Success_Case(t *testing.T) {
 
 	eh := echo.New()
 	go func(e *echo.Echo) {
@@ -77,7 +75,7 @@ func Test_it_Create_Success_Case(t *testing.T) {
 	//Assert
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		assert.NotEmpty(t, want.ID)
+		assert.NotEqual(t, 0, resStruct.ID)
 		assert.Equal(t, want.Title, resStruct.Title)
 		assert.Equal(t, want.Amount, resStruct.Amount)
 		assert.Equal(t, want.Note, resStruct.Note)
