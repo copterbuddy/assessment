@@ -70,7 +70,6 @@ func Test_it_Create_Success_Case(t *testing.T) {
 	byteBody, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(t, err)
 	resp.Body.Close()
-	fmt.Println("byteBody is :", string(byteBody))
 
 	var resStruct Expense
 	json.Unmarshal(byteBody, &resStruct)
@@ -83,6 +82,66 @@ func Test_it_Create_Success_Case(t *testing.T) {
 		assert.Equal(t, want.Amount, resStruct.Amount)
 		assert.Equal(t, want.Note, resStruct.Note)
 		assert.Equal(t, want.Tags, resStruct.Tags)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = eh.Shutdown(ctx)
+	assert.NoError(t, err)
+}
+
+func Test_it_Create_Success_Case_Not_Found(t *testing.T) {
+
+	eh := echo.New()
+	go func(e *echo.Echo) {
+		db, err := sql.Open("postgres", "postgresql://root:root@db/go-example-db?sslmode=disable")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		h := NewExpenseHandler(db)
+
+		e.GET("/expenses/:id", h.GetExpenseByIdHandler)
+		e.Start(fmt.Sprintf(":%d", serverPort))
+	}(eh)
+	for {
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", serverPort), 30*time.Second)
+		if err != nil {
+			log.Println(err)
+		}
+		if conn != nil {
+			conn.Close()
+			break
+		}
+	}
+
+	//Arrange
+	testcase := "2"
+
+	want := Err{
+		Message: "Not found your expense",
+	}
+
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d/expenses/"+testcase, serverPort), strings.NewReader(""))
+	assert.NoError(t, err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	client := http.Client{}
+
+	//Act
+	resp, err := client.Do(req)
+	assert.NoError(t, err)
+
+	byteBody, err := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	resp.Body.Close()
+
+	var resStruct Err
+	json.Unmarshal(byteBody, &resStruct)
+
+	//Assert
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+		assert.NotEmpty(t, want, resStruct)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
