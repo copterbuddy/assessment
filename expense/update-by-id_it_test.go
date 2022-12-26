@@ -69,7 +69,6 @@ func Test_it_Update_Success_Case(t *testing.T) {
 	byteBody, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(t, err)
 	resp.Body.Close()
-	fmt.Println("byteBody is :", string(byteBody))
 
 	var resStruct Expense
 	json.Unmarshal(byteBody, &resStruct)
