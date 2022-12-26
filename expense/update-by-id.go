@@ -21,8 +21,8 @@ func (h *handler) UpdateExpenseHandler(c echo.Context) error {
 	}
 
 	if e.Title == "" || e.Amount == 0 || e.Note == "" || e.Tags == nil {
-		return c.JSON(http.StatusBadRequest, Err{Message: "data incurrect"})
+		return c.JSON(http.StatusBadRequest, Err{Message: "data incorrect"})
 	}
 
-	return c.JSON(http.StatusCreated, "ok")
+	return c.JSON(http.StatusOK, "ok")
 }
