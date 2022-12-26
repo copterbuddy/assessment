@@ -1,9 +1,11 @@
 package expense
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/lib/pq"
 )
 
 func (h *handler) UpdateExpenseHandler(c echo.Context) error {
@@ -24,13 +26,32 @@ func (h *handler) UpdateExpenseHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, Err{Message: "data incorrect"})
 	}
 
-	result := Expense{
-		ID:     1,
+	result, err := h.DB.Exec(`
+	UPDATE expenses
+	set title=$1,amount=$2,note=$3,tags=$4
+	WHERE id=$5;
+	`, e.Title, e.Amount, e.Note, pq.Array(e.Tags), e.ID)
+	if err != nil {
+		log.Fatal(err)
+		return c.JSON(http.StatusInternalServerError, Err{Message: "internal server error please contact admin"})
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+		return c.JSON(http.StatusInternalServerError, Err{Message: "internal server error please contact admin"})
+	}
+	if rows != 1 {
+		log.Fatalf("expected single row affected, got %d rows affected", rows)
+		return c.JSON(http.StatusInternalServerError, Err{Message: "internal server error please contact admin"})
+	}
+
+	resp := Expense{
+		ID:     e.ID,
 		Title:  e.Title,
-		Amount: 89,
+		Amount: e.Amount,
 		Note:   e.Note,
 		Tags:   e.Tags,
 	}
 
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, resp)
 }

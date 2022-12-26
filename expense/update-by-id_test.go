@@ -2,8 +2,10 @@ package expense
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/copterbuddy/assessment/converter"
 	"github.com/copterbuddy/assessment/request"
 	"github.com/stretchr/testify/assert"
@@ -11,14 +13,6 @@ import (
 
 func Test_Update_Success(t *testing.T) {
 	//Arrange
-	testcase := Expense{
-		ID:     0,
-		Title:  "strawberry smoothie",
-		Amount: 79,
-		Note:   "night market promotion discount 10 bath",
-		Tags:   []string{"food", "beverage"},
-	}
-
 	want := Expense{
 		ID:     1,
 		Title:  "strawberry smoothie",
@@ -27,13 +21,24 @@ func Test_Update_Success(t *testing.T) {
 		Tags:   []string{"food", "beverage"},
 	}
 
-	ctx, rec := request.Request(http.MethodPut, request.Uri("expenses"), converter.ReqString(testcase))
+	ctx, rec := request.Request(http.MethodPut, request.Uri("expenses"), converter.ReqString(want))
 	ctx.SetParamNames("id")
 	ctx.SetParamValues("1")
-	h := handler{nil}
+
+	db, mock, err := sqlmock.New()
+	// mock.ExpectExec("Update expenses set title=$1,amount=$2,note=$3,tags=$4 WHERE id=$5;").
+
+	// mock.ExpectBegin()
+	mock.ExpectExec(("UPDATE expenses set (.+)")).
+		WithArgs(want.Title, want.Amount, want.Note, `{"`+strings.Join(want.Tags, `","`)+`"}`, want.ID).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	h := handler{db}
 
 	//Act
-	err := h.UpdateExpenseHandler(ctx)
+	err = h.UpdateExpenseHandler(ctx)
 	if err != nil {
 		t.Errorf("Test failed: %v", err)
 	}
