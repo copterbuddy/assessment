@@ -1,6 +1,7 @@
 package expense
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -49,6 +50,53 @@ func Test_Update_Success(t *testing.T) {
 	//Assert
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, want, ResponseBody)
+	}
+}
+
+func Test_Update_Error(t *testing.T) {
+	//Arrange
+	testcase := Expense{
+		ID:     1,
+		Title:  "strawberry smoothie",
+		Amount: 89,
+		Note:   "night market promotion discount 10 bath",
+		Tags:   []string{"food", "beverage"},
+	}
+
+	want := Err{
+		Message: "internal server error please contact admin",
+	}
+
+	ctx, rec := request.Request(http.MethodPut, request.Uri("expenses"), converter.ReqString(testcase))
+	ctx.SetParamNames("id")
+	ctx.SetParamValues("1")
+
+	db, mock, err := sqlmock.New()
+
+	// rows := NewRows([]string{"id", "title"}).
+	// 	RowError(1, fmt.Errorf("row error"))
+
+	mock.ExpectExec(("UPDATE expenses set (.+)")).
+		WithArgs(testcase.Title, testcase.Amount, testcase.Note, `{"`+strings.Join(testcase.Tags, `","`)+`"}`, testcase.ID).
+		WillReturnError(fmt.Errorf("some error"))
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	h := handler{db}
+
+	//Act
+	err = h.UpdateExpenseHandler(ctx)
+	if err != nil {
+		t.Errorf("Test failed: %v", err)
+	}
+
+	ResponseBody := Err{}
+	converter.ResStruct(rec, &ResponseBody)
+
+	//Assert
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 		assert.Equal(t, want, ResponseBody)
 	}
 }

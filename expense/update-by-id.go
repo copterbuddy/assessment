@@ -1,7 +1,6 @@
 package expense
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -32,16 +31,16 @@ func (h *handler) UpdateExpenseHandler(c echo.Context) error {
 	WHERE id=$5;
 	`, e.Title, e.Amount, e.Note, pq.Array(e.Tags), e.ID)
 	if err != nil {
-		log.Fatal(err)
+		c.Logger().Info(err.Error())
 		return c.JSON(http.StatusInternalServerError, Err{Message: "internal server error please contact admin"})
 	}
 	rows, err := result.RowsAffected()
 	if err != nil {
-		log.Fatal(err)
+		c.Logger().Info(err.Error())
 		return c.JSON(http.StatusInternalServerError, Err{Message: "internal server error please contact admin"})
 	}
 	if rows != 1 {
-		log.Fatalf("expected single row affected, got %d rows affected", rows)
+		c.Logger().Info("expected single row affected, got %d rows affected", rows)
 		return c.JSON(http.StatusInternalServerError, Err{Message: "internal server error please contact admin"})
 	}
 
