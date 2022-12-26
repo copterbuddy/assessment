@@ -1,8 +1,12 @@
+//go:build unit
+// +build unit
+
 package expense
 
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -14,6 +18,7 @@ import (
 
 func Test_Update_Success(t *testing.T) {
 	//Arrange
+	id := "1"
 	want := Expense{
 		ID:     1,
 		Title:  "strawberry smoothie",
@@ -24,14 +29,14 @@ func Test_Update_Success(t *testing.T) {
 
 	ctx, rec := request.Request(http.MethodPut, request.Uri("expenses"), converter.ReqString(want))
 	ctx.SetParamNames("id")
-	ctx.SetParamValues("1")
+	ctx.SetParamValues(id)
 
 	db, mock, err := sqlmock.New()
 	// mock.ExpectExec("Update expenses set title=$1,amount=$2,note=$3,tags=$4 WHERE id=$5;").
 
 	// mock.ExpectBegin()
 	mock.ExpectExec(("UPDATE expenses set (.+)")).
-		WithArgs(want.Title, want.Amount, want.Note, `{"`+strings.Join(want.Tags, `","`)+`"}`, want.ID).
+		WithArgs(want.Title, want.Amount, want.Note, `{"`+strings.Join(want.Tags, `","`)+`"}`, string(id)).
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -50,7 +55,11 @@ func Test_Update_Success(t *testing.T) {
 	//Assert
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, want, ResponseBody)
+		assert.Equal(t, id, strconv.Itoa(ResponseBody.ID))
+		assert.Equal(t, want.Title, ResponseBody.Title)
+		assert.Equal(t, want.Amount, ResponseBody.Amount)
+		assert.Equal(t, want.Note, ResponseBody.Note)
+		assert.Equal(t, want.Tags, ResponseBody.Tags)
 	}
 }
 

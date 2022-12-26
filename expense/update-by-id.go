@@ -1,6 +1,7 @@
 package expense
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -25,11 +26,13 @@ func (h *handler) UpdateExpenseHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, Err{Message: "data incorrect"})
 	}
 
+	fmt.Println("title is", e.Title, "amount is", e.Amount)
+
 	result, err := h.DB.Exec(`
 	UPDATE expenses
 	set title=$1,amount=$2,note=$3,tags=$4
 	WHERE id=$5;
-	`, e.Title, e.Amount, e.Note, pq.Array(e.Tags), e.ID)
+	`, e.Title, e.Amount, e.Note, pq.Array(e.Tags), id)
 	if err != nil {
 		c.Logger().Info(err.Error())
 		return c.JSON(http.StatusInternalServerError, Err{Message: "internal server error please contact admin"})
