@@ -19,7 +19,15 @@ func Test_Update_Success(t *testing.T) {
 		Tags:   []string{"food", "beverage"},
 	}
 
-	ctx, res := request.Request(http.MethodPut, request.Uri("expenses"), converter.ReqString(testcase))
+	want := Expense{
+		ID:     1,
+		Title:  "strawberry smoothie",
+		Amount: 89,
+		Note:   "night market promotion discount 10 bath",
+		Tags:   []string{"food", "beverage"},
+	}
+
+	ctx, rec := request.Request(http.MethodPut, request.Uri("expenses"), converter.ReqString(testcase))
 	ctx.SetParamNames("id")
 	ctx.SetParamValues("1")
 	h := handler{nil}
@@ -30,9 +38,13 @@ func Test_Update_Success(t *testing.T) {
 		t.Errorf("Test failed: %v", err)
 	}
 
+	ResponseBody := Expense{}
+	converter.ResStruct(rec, &ResponseBody)
+
 	//Assert
 	if assert.NoError(t, err) {
-		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, want, ResponseBody)
 	}
 }
 

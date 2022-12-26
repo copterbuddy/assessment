@@ -24,5 +24,13 @@ func (h *handler) UpdateExpenseHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, Err{Message: "data incorrect"})
 	}
 
-	return c.JSON(http.StatusOK, "ok")
+	result := Expense{
+		ID:     1,
+		Title:  e.Title,
+		Amount: 89,
+		Note:   e.Note,
+		Tags:   e.Tags,
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
