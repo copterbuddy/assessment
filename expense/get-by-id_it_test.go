@@ -88,7 +88,7 @@ func Test_it_Get_Success_Case(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func Test_it_Create_Success_Case_Not_Found(t *testing.T) {
+func Test_it_Get_Success_Case_Not_Found(t *testing.T) {
 
 	eh := echo.New()
 	go func(e *echo.Echo) {
@@ -114,7 +114,7 @@ func Test_it_Create_Success_Case_Not_Found(t *testing.T) {
 	}
 
 	//Arrange
-	testcase := "2"
+	testcase := "0"
 
 	want := Err{
 		Message: "Not found your expense",
