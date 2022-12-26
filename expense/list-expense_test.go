@@ -1,15 +1,18 @@
 package expense
 
 import (
+	"database/sql"
 	"net/http"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/copterbuddy/assessment/converter"
 	"github.com/copterbuddy/assessment/request"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Get_Expense_By_Id(t *testing.T) {
+func Test_List_Expense(t *testing.T) {
 	//Arrange
 	want := []Expense{
 		{
@@ -29,10 +32,21 @@ func Test_Get_Expense_By_Id(t *testing.T) {
 	}
 
 	c, rec := request.Request(http.MethodGet, request.Uri("expenses"), "")
-	h := handler{nil}
+
+	newsMockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"})
+	for _, item := range want {
+		newsMockRows.AddRow(item.ID, item.Title, item.Amount, item.Note, pq.Array(item.Tags))
+	}
+
+	db, mock, err := sqlmock.New()
+	mock.ExpectQuery("SELECT (.+) FROM expenses").WillReturnRows(newsMockRows)
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	h := handler{db}
 
 	//Act
-	err := h.ListExpenseHandler(c)
+	err = h.ListExpenseHandler(c)
 	ResponseBody := []Expense{}
 	converter.ResStruct(rec, &ResponseBody)
 
@@ -40,6 +54,35 @@ func Test_Get_Expense_By_Id(t *testing.T) {
 	assert.NoError(t, err)
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, want, ResponseBody)
+	}
+}
+
+func Test_List_Expense_Error(t *testing.T) {
+	//Arrange
+	want := Err{
+		Message: "Not found your expense",
+	}
+
+	c, rec := request.Request(http.MethodGet, request.Uri("expenses"), "")
+
+	newsMockRows := sql.ErrNoRows
+	db, mock, err := sqlmock.New()
+	mock.ExpectQuery("SELECT (.+) FROM expenses").WillReturnError(newsMockRows)
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	h := handler{db}
+
+	//Act
+	err = h.ListExpenseHandler(c)
+	ResponseBody := Err{}
+	converter.ResStruct(rec, &ResponseBody)
+
+	//Assert
+	assert.NoError(t, err)
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
 		assert.Equal(t, want, ResponseBody)
 	}
 }
