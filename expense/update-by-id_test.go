@@ -11,8 +11,15 @@ import (
 
 func Test_Update_Route_Success(t *testing.T) {
 	//Arrange
+	testcase := Expense{
+		ID:     0,
+		Title:  "strawberry smoothie",
+		Amount: 79,
+		Note:   "night market promotion discount 10 bath",
+		Tags:   []string{"food", "beverage"},
+	}
 
-	c, res := request.Request(http.MethodPut, request.Uri("expenses"), "")
+	c, res := request.Request(http.MethodPut, request.Uri("expenses"), converter.ReqString(testcase))
 	c.SetParamNames("id")
 	c.SetParamValues("1")
 	h := handler{nil}
@@ -25,7 +32,7 @@ func Test_Update_Route_Success(t *testing.T) {
 
 	//Assert
 	if assert.NoError(t, err) {
-		assert.Equal(t, http.StatusCreated, res.Code)
+		assert.Equal(t, http.StatusOK, res.Code)
 	}
 }
 
