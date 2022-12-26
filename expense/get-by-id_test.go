@@ -27,7 +27,7 @@ func Test_Get_Expense_By_Id(t *testing.T) {
 
 	c, rec := request.Request(http.MethodGet, request.Uri("expenses"), "")
 	c.SetParamNames("id")
-	c.SetParamValues("2")
+	c.SetParamValues("1")
 
 	newsMockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
 		AddRow(want.ID, want.Title, want.Amount, want.Note, pq.Array(want.Tags))
