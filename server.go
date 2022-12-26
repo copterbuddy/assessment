@@ -34,6 +34,7 @@ func main() {
 	e.POST("/expenses", h.CreateExpenseHandler)
 	e.GET("/expenses/:id", h.GetExpenseByIdHandler)
 	e.PUT("/expenses/:id", h.UpdateExpenseHandler)
+	e.GET("/expenses", h.ListExpenseHandler)
 
 	e.Logger.SetLevel(log.INFO)
 
