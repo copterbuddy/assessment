@@ -3,6 +3,7 @@ package expense
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
@@ -11,12 +12,18 @@ import (
 func (h *handler) UpdateExpenseHandler(c echo.Context) error {
 
 	id := c.Param("id")
+	idDigit, err := strconv.Atoi(id)
+	if err != nil {
+		c.Logger().Info(err)
+		return c.JSON(http.StatusBadRequest, Err{Message: "bad request"})
+	}
+
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, Err{Message: "data incorrect"})
 	}
 
 	var e Expense
-	err := c.Bind(&e)
+	err = c.Bind(&e)
 	if err != nil {
 		c.Logger().Info(err)
 		return c.JSON(http.StatusBadRequest, Err{Message: "bad request"})
@@ -48,7 +55,7 @@ func (h *handler) UpdateExpenseHandler(c echo.Context) error {
 	}
 
 	resp := Expense{
-		ID:     e.ID,
+		ID:     idDigit,
 		Title:  e.Title,
 		Amount: e.Amount,
 		Note:   e.Note,
