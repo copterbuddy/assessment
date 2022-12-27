@@ -26,18 +26,20 @@ func main() {
 	}
 
 	e := echo.New()
+	e.Logger.SetLevel(log.INFO)
 	h := expense.NewExpenseHandler(db)
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(Auth)
+	g := e.Group("/expenses")
+	{
+		g.Use(middleware.Logger())
+		g.Use(middleware.Recover())
+		g.Use(Auth)
 
-	e.POST("/expenses", h.CreateExpenseHandler)
-	e.GET("/expenses/:id", h.GetExpenseByIdHandler)
-	e.PUT("/expenses/:id", h.UpdateExpenseHandler)
-	e.GET("/expenses", h.ListExpenseHandler)
-
-	e.Logger.SetLevel(log.INFO)
+		g.POST("/", h.CreateExpenseHandler)
+		g.GET("/:id", h.GetExpenseByIdHandler)
+		g.PUT("/:id", h.UpdateExpenseHandler)
+		g.GET("/", h.ListExpenseHandler)
+	}
 
 	e.Logger.Fatal(e.Start(":2565"))
 
