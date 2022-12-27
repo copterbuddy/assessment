@@ -68,6 +68,7 @@ func Test_it_Create_Success_Case(t *testing.T) {
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:%d/expenses", serverPort), strings.NewReader(converter.ReqString(testcase)))
 	assert.NoError(t, err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(echo.HeaderAuthorization, "November 10, 2009")
 	client := http.Client{}
 
 	//Act
