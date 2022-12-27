@@ -30,6 +30,7 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(Auth)
 
 	e.POST("/expenses", h.CreateExpenseHandler)
 	e.GET("/expenses/:id", h.GetExpenseByIdHandler)
@@ -87,4 +88,16 @@ func InitDB() (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func Auth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if len(c.Request().Header["Authorization"]) > 0 {
+			if c.Request().Header["Authorization"][0] == "November 10, 2009" {
+				c.Response().Header().Set(echo.HeaderServer, "Echo/3.0")
+				return next(c)
+			}
+		}
+		return c.JSON(http.StatusForbidden, "You are not authorized!")
+	}
 }
