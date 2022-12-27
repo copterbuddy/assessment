@@ -1,11 +1,10 @@
 //go:build integration
 // +build integration
 
-package expense
+package main
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -15,24 +14,22 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"unsafe"
 
+	"github.com/copterbuddy/assessment/expense"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_it_List_Expense_Success_Case(t *testing.T) {
+const serverPort = 2565
+
+func Test_it_No_Auth(t *testing.T) {
 
 	eh := echo.New()
+	eh.Use(Auth)
 	go func(e *echo.Echo) {
-		db, err := sql.Open("postgres", "postgresql://root:root@db/go-example-db?sslmode=disable")
-		if err != nil {
-			log.Fatal(err)
-		}
+		h := expense.NewExpenseHandler(nil)
 
-		h := NewExpenseHandler(db)
-
-		e.GET("/expenses", h.ListExpenseHandler)
+		e.GET("/expenses", h.GetExpenseByIdHandler)
 		e.Start(fmt.Sprintf(":%d", serverPort))
 	}(eh)
 	for {
@@ -50,7 +47,7 @@ func Test_it_List_Expense_Success_Case(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d/expenses", serverPort), strings.NewReader(""))
 	assert.NoError(t, err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.Header.Set(echo.HeaderAuthorization, "November 10, 2009")
+	req.Header.Set(echo.HeaderAuthorization, "November 10, 2009wrong_token")
 	client := http.Client{}
 
 	//Act
@@ -61,13 +58,13 @@ func Test_it_List_Expense_Success_Case(t *testing.T) {
 	assert.NoError(t, err)
 	resp.Body.Close()
 
-	var resStruct []Expense
-	json.Unmarshal(byteBody, &resStruct)
+	var result string
+	json.Unmarshal(byteBody, &result)
 
 	//Assert
 	if assert.NoError(t, err) {
-		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		assert.NotEqual(t, 0, unsafe.Sizeof(resStruct))
+		assert.Equal(t, http.StatusForbidden, resp.StatusCode)
+		assert.Equal(t, "You are not authorized!", result)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

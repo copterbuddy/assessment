@@ -26,17 +26,20 @@ func main() {
 	}
 
 	e := echo.New()
+	e.Logger.SetLevel(log.INFO)
 	h := expense.NewExpenseHandler(db)
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	g := e.Group("/expenses")
+	{
+		g.Use(middleware.Logger())
+		g.Use(middleware.Recover())
+		g.Use(Auth)
 
-	e.POST("/expenses", h.CreateExpenseHandler)
-	e.GET("/expenses/:id", h.GetExpenseByIdHandler)
-	e.PUT("/expenses/:id", h.UpdateExpenseHandler)
-	e.GET("/expenses", h.ListExpenseHandler)
-
-	e.Logger.SetLevel(log.INFO)
+		g.POST("/", h.CreateExpenseHandler)
+		g.GET("/:id", h.GetExpenseByIdHandler)
+		g.PUT("/:id", h.UpdateExpenseHandler)
+		g.GET("/", h.ListExpenseHandler)
+	}
 
 	e.Logger.Fatal(e.Start(":2565"))
 
@@ -87,4 +90,16 @@ func InitDB() (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func Auth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if len(c.Request().Header["Authorization"]) > 0 {
+			if c.Request().Header["Authorization"][0] == "November 10, 2009" {
+				c.Response().Header().Set(echo.HeaderServer, "Echo/3.0")
+				return next(c)
+			}
+		}
+		return c.JSON(http.StatusForbidden, "You are not authorized!")
+	}
 }
