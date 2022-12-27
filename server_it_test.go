@@ -63,7 +63,7 @@ func Test_it_No_Auth(t *testing.T) {
 
 	//Assert
 	if assert.NoError(t, err) {
-		assert.Equal(t, http.StatusForbidden, resp.StatusCode)
+		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 		assert.Equal(t, "You are not authorized!", result)
 	}
 

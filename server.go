@@ -100,6 +100,6 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 				return next(c)
 			}
 		}
-		return c.JSON(http.StatusForbidden, "You are not authorized!")
+		return c.JSON(http.StatusUnauthorized, "You are not authorized!")
 	}
 }
