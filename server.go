@@ -35,10 +35,10 @@ func main() {
 		g.Use(middleware.Recover())
 		g.Use(Auth)
 
-		g.POST("/", h.CreateExpenseHandler)
+		g.POST("", h.CreateExpenseHandler)
 		g.GET("/:id", h.GetExpenseByIdHandler)
 		g.PUT("/:id", h.UpdateExpenseHandler)
-		g.GET("/", h.ListExpenseHandler)
+		g.GET("", h.ListExpenseHandler)
 	}
 
 	e.Logger.Fatal(e.Start(":2565"))
