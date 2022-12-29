@@ -50,7 +50,10 @@ func Test_Create_Success_Case(t *testing.T) {
 	}
 
 	ResponseBody := Expense{}
-	converter.ResStruct(res, &ResponseBody)
+	err = converter.ResStruct(res, &ResponseBody)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	assert.Equal(t, http.StatusCreated, res.Code)
@@ -81,11 +84,14 @@ func Test_Create_When_Query_Error(t *testing.T) {
 	//Act
 	err = h.CreateExpenseHandler(ctx)
 	if err != nil {
-		t.Errorf("Test failed: %v", err)
+		t.Errorf("Test Failed because: %v", err)
 	}
 
 	ResponseBody := Err{}
-	converter.ResStruct(res, &ResponseBody)
+	err = converter.ResStruct(res, &ResponseBody)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	assert.Equal(t, http.StatusInternalServerError, res.Code)
@@ -117,7 +123,10 @@ func Test_Create_When_Request_Body_Bind_Error(t *testing.T) {
 			}
 
 			ResponseBody := Err{}
-			converter.ResStruct(res, &ResponseBody)
+			err = converter.ResStruct(res, &ResponseBody)
+			if err != nil {
+				t.Errorf("Test Failed because: %v", err)
+			}
 
 			//Assert
 			assert.Equal(t, http.StatusBadRequest, res.Code)
@@ -153,7 +162,10 @@ func Test_Create_When_No_Request_Body(t *testing.T) {
 			}
 
 			ResponseBody := Err{}
-			converter.ResStruct(res, &ResponseBody)
+			err = converter.ResStruct(res, &ResponseBody)
+			if err != nil {
+				t.Errorf("Test Failed because: %v", err)
+			}
 
 			//Assert
 			assert.Equal(t, http.StatusBadRequest, res.Code)
