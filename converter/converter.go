@@ -13,6 +13,6 @@ func ReqString(reqStruct interface{}) string {
 	return string(result)
 }
 
-func ResStruct(res *httptest.ResponseRecorder, result interface{}) {
-	json.Unmarshal([]byte(res.Body.Bytes()), &result)
+func ResStruct(res *httptest.ResponseRecorder, result interface{}) error {
+	return json.Unmarshal([]byte(res.Body.Bytes()), &result)
 }

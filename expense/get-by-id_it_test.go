@@ -71,7 +71,10 @@ func Test_it_Get_Success_Case(t *testing.T) {
 	resp.Body.Close()
 
 	var resStruct Expense
-	json.Unmarshal(byteBody, &resStruct)
+	err = json.Unmarshal(byteBody, &resStruct)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	if assert.NoError(t, err) {
@@ -135,7 +138,10 @@ func Test_it_Get_Success_Case_Not_Found(t *testing.T) {
 	resp.Body.Close()
 
 	var resStruct Err
-	json.Unmarshal(byteBody, &resStruct)
+	err = json.Unmarshal(byteBody, &resStruct)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	if assert.NoError(t, err) {

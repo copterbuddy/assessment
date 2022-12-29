@@ -51,7 +51,10 @@ func Test_List_Expense(t *testing.T) {
 	//Act
 	err = h.ListExpenseHandler(c)
 	ResponseBody := []Expense{}
-	converter.ResStruct(rec, &ResponseBody)
+	err = converter.ResStruct(rec, &ResponseBody)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	assert.NoError(t, err)
@@ -80,7 +83,10 @@ func Test_List_Expense_Error(t *testing.T) {
 	//Act
 	err = h.ListExpenseHandler(c)
 	ResponseBody := Err{}
-	converter.ResStruct(rec, &ResponseBody)
+	err = converter.ResStruct(rec, &ResponseBody)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	assert.NoError(t, err)

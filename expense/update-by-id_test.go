@@ -50,7 +50,10 @@ func Test_Update_Success(t *testing.T) {
 	}
 
 	ResponseBody := Expense{}
-	converter.ResStruct(rec, &ResponseBody)
+	err = converter.ResStruct(rec, &ResponseBody)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	if assert.NoError(t, err) {

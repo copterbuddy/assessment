@@ -43,7 +43,10 @@ func Test_Get_Expense_By_Id(t *testing.T) {
 	err = h.GetExpenseByIdHandler(c)
 
 	ResponseBody := Expense{}
-	converter.ResStruct(rec, &ResponseBody)
+	err = converter.ResStruct(rec, &ResponseBody)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	assert.NoError(t, err)
@@ -75,7 +78,10 @@ func Test_Get_Expense_By_Id_Error_No_Row(t *testing.T) {
 	err = h.GetExpenseByIdHandler(c)
 
 	ResponseBody := Err{}
-	converter.ResStruct(rec, &ResponseBody)
+	err = converter.ResStruct(rec, &ResponseBody)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	assert.NoError(t, err)
@@ -113,7 +119,10 @@ func Test_Get_Expense_By_Id_Not_Found(t *testing.T) {
 	err = h.GetExpenseByIdHandler(c)
 
 	ResponseBody := Err{}
-	converter.ResStruct(rec, &ResponseBody)
+	err = converter.ResStruct(rec, &ResponseBody)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	assert.NoError(t, err)

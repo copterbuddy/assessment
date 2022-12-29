@@ -80,7 +80,10 @@ func Test_it_Create_Success_Case(t *testing.T) {
 	resp.Body.Close()
 
 	var resStruct Expense
-	json.Unmarshal(byteBody, &resStruct)
+	err = json.Unmarshal(byteBody, &resStruct)
+	if err != nil {
+		t.Errorf("Test Failed because: %v", err)
+	}
 
 	//Assert
 	if assert.NoError(t, err) {
