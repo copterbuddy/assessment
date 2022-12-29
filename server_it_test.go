@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/copterbuddy/assessment/expense"
+	"github.com/copterbuddy/assessment/request"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +26,7 @@ const serverPort = 2565
 func Test_it_No_Auth(t *testing.T) {
 
 	eh := echo.New()
-	eh.Use(Auth)
+	eh.Use(request.Auth)
 	go func(e *echo.Echo) {
 		h := expense.NewExpenseHandler(nil)
 
