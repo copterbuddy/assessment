@@ -1,7 +1,6 @@
 package expense
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -33,8 +32,6 @@ func (h *handler) UpdateExpenseHandler(c echo.Context) error {
 	if e.Title == "" || e.Amount == 0 || e.Note == "" || e.Tags == nil {
 		return c.JSON(http.StatusBadRequest, Err{Message: "data incorrect"})
 	}
-
-	fmt.Println("title is", e.Title, "amount is", e.Amount)
 
 	result, err := h.DB.Exec(`
 	UPDATE expenses

@@ -8,24 +8,6 @@ import (
 )
 
 func (h *handler) ListExpenseHandler(c echo.Context) error {
-
-	// result := []Expense{
-	// 	{
-	// 		ID:     1,
-	// 		Title:  "strawberry smoothie",
-	// 		Amount: 79,
-	// 		Note:   "night market promotion discount 10 bath",
-	// 		Tags:   []string{"food", "beverage"},
-	// 	},
-	// 	{
-	// 		ID:     2,
-	// 		Title:  "strawberry smoothie",
-	// 		Amount: 79,
-	// 		Note:   "night market promotion discount 10 bath",
-	// 		Tags:   []string{"food", "beverage"},
-	// 	},
-	// }
-
 	rows, err := h.DB.Query("SELECT * FROM expenses")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Err{Message: "Not found your expense"})
