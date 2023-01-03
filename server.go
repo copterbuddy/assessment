@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/copterbuddy/assessment/expense"
-	"github.com/copterbuddy/assessment/greeting"
 	"github.com/copterbuddy/assessment/request"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -56,7 +55,6 @@ func GracefulShutdown(e *echo.Echo) {
 
 func SetupApi(db *sql.DB, e *echo.Echo) {
 	expenseHandler := expense.NewExpenseHandler(db)
-	greetingHandler := greeting.NewGreetingHandler()
 	g := e.Group("/expenses")
 	{
 		g.Use(middleware.Logger())
@@ -68,8 +66,6 @@ func SetupApi(db *sql.DB, e *echo.Echo) {
 		g.PUT("/:id", expenseHandler.UpdateExpenseHandler)
 		g.GET("", expenseHandler.ListExpenseHandler)
 	}
-
-	e.GET("/", greetingHandler.Greeting)
 }
 
 func InitDB() (*sql.DB, error) {
