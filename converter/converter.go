@@ -9,7 +9,11 @@ func ReqString(reqStruct interface{}) string {
 	if reqStruct == nil {
 		return ""
 	}
-	result, _ := json.Marshal(&reqStruct)
+
+	result, err := json.Marshal(&reqStruct)
+	if err != nil {
+		return ""
+	}
 	return string(result)
 }
 
