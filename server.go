@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -31,7 +32,7 @@ func main() {
 
 	SetupApi(db, e)
 
-	e.Logger.Fatal(e.Start(":2565"))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%v", os.Getenv("PORT"))))
 
 	go func() {
 		if err := e.Start(":2565"); err != nil && err != http.ErrServerClosed {
