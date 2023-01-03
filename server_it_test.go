@@ -34,7 +34,7 @@ func Test_it_No_Auth(t *testing.T) {
 		e.Start(fmt.Sprintf(":%d", serverPort))
 	}(eh)
 	for {
-		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", serverPort), 30*time.Second)
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%v", serverPort), 30*time.Second)
 		if err != nil {
 			log.Println(err)
 		}
